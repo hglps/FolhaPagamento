@@ -2,11 +2,11 @@ package allsystem;
 
 public class Worker {
 
-    public String name;
-    public String address;
-    public String typePayment;
-    public double salary = 0;
-    public int id;
+    private String name;
+    private String address;
+    private String typePayment;
+    private double salary = 0;
+    private int id;
 
     public Worker(String name, String address, String typePayment, int i) {
 
@@ -23,15 +23,20 @@ public class Worker {
 
     }
 
-
-
-
-
-
-
-
-
-
-
+    public String getName() {
+        return name;
     }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getTypePayment() {
+        return typePayment;
+    }
+
+    public int getId() {
+        return id;
+    }
+}
 
