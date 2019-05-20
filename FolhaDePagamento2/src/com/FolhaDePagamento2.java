@@ -5,6 +5,7 @@ import java.util.Scanner;
 public class FolhaDePagamento2 {
 
     final static int maxSize=100;
+    final static int patternId = 19002100;
 
     private static Scanner read = new Scanner(System.in);
     private static String[] name = new String[maxSize];
@@ -16,11 +17,16 @@ public class FolhaDePagamento2 {
     private static boolean[] unionMember = new boolean[maxSize];
     private static double[] unionFee = new double[maxSize];
     private static int[] id = new int[maxSize];
+    private static int[] hourIn = new int[maxSize];
+    private static int[] minuteIn = new int[maxSize];
+    private static int[] secIn = new int[maxSize];
+    private static int[] hourOut = new int[maxSize];
+    private static int[] minuteOut = new int[maxSize];
+    private static int[] secOut = new int[maxSize];
 
     public static void main(String[] args) {
         setAllIds();
-        int choice, indexArray = 19002100;
-        int auxIndex = indexArray;
+        int choice, indexArray;
         int idEmployee;
         visualizeOptions();
 
@@ -34,28 +40,24 @@ public class FolhaDePagamento2 {
             }
             else if(choice == 1){
                 //add new employee
-                addEmployee(auxIndex);
-                auxIndex+=1;
+                indexArray = setIndexArray();
+                addEmployee(indexArray);
             }
             else if(choice == 2){
                 //delete employee
-                System.out.println("Insert ID:");
-                int selectedId = read.nextInt();
-
-                deleteEmployee(selectedId);
-
-                //if(listWorkers[idEmployee] != null){
-                    //listWorkers[idEmployee] = null;
-                   // System.out.println("\nEmployee deleted from system with success!");
-                //}
-                //else System.out.println("The selected ID is not associated with any employee registered!\nOperation not executed");
-
-
-
+                System.out.println("Insert ID:"); idEmployee = read.nextInt();
+                deleteEmployee(idEmployee);
             }
             else if(choice == 3){
                 //get bate ponto and insert in employee data
-            }
+                System.out.println("Insert ID:");
+                idEmployee = read.nextInt();
+                indexArray = getIndex(idEmployee);
+                if(id[indexArray] != -1){
+                    setTimeCheck(indexArray);
+                }
+                else System.out.println("Employee not found!");
+            }// still missing date
             else if(choice == 4){
                 //get resultado de venda and insert in employee data
             }
@@ -66,17 +68,10 @@ public class FolhaDePagamento2 {
                 //change basic employee info
                 System.out.println("Insert ID:");
                 idEmployee = read.nextInt();
-                //int index = getIndexArray(idEmployee);
-
-                //if(id){
-                    //listWorkers[ idEmployee ] = addEmployee(listWorkers[ idEmployee ], idEmployee, 6);
-                    //System.out.println("Info from employee: " +listWorkers[ idEmployee ].getName()+  " and ID: "+idEmployee+ " modified!");
-                //}
-
-                //else System.out.println("Employee not found!\nChanges must not be applied!");
-
-
-
+                int index = getIndex(idEmployee);
+                if(id[index] != -1)
+                    changeRegister(index);
+                else System.out.println("Employee not found!\nChanges must not be applied!");
 
             } //change basic info
             else if(choice == 7){
@@ -93,9 +88,10 @@ public class FolhaDePagamento2 {
             }
             else if(choice == 11){
                 //control method
-                System.out.println("select id:");
+                System.out.println("Select id:");
                 int selectedEmployee = read.nextInt();
-                int index = getIndexArray(selectedEmployee);
+                int index = getIndex(selectedEmployee);
+
                 if(id[index] != -1){
 
                     System.out.println("name="+ name[index]);
@@ -104,6 +100,8 @@ public class FolhaDePagamento2 {
                     System.out.println("id="+ id[index] );
                     System.out.println("part of union= "+ unionMember[index] );
                     System.out.println("union fee= "+ unionFee[index]);
+                    System.out.println("Check in= " + hourIn[index] + ":" + minuteIn[index] + ":" + secIn[index]);
+                    System.out.println("Check out= " + hourOut[index] + ":" + minuteOut[index] + ":" + secOut[index]);
                 }
                 else System.out.println("Employee not found\n\n");
             }
@@ -118,15 +116,45 @@ public class FolhaDePagamento2 {
 
     }
 
-    private static void setAllIds() {
-        for(int i=0; i< maxSize; i++){
-            id[i] = -1;
+    private static void setTimeCheck(int indexArray) {
+        System.out.println("Are you checking in or checking out?\n"+
+                "1 - in\n"+
+                "2 - out");
+        int option = read.nextInt();
+        read.nextLine();
+        System.out.println("Insert time in format:\n"+
+                "00:00:00 up to 23:59:59");
+        String time = read.nextLine();
+
+        if(option == 1){
+            hourIn[indexArray] = Integer.parseInt(time.substring(0,2));
+            minuteIn[indexArray] = Integer.parseInt(time.substring(3,5));
+            secIn[indexArray] = Integer.parseInt(time.substring(6,8));
+            System.out.println("Check-in done!");
         }
+        else if(option == 2){
+            hourOut[indexArray] = Integer.parseInt(time.substring(0,2));
+            minuteOut[indexArray] = Integer.parseInt(time.substring(3,5));
+            secOut[indexArray] = Integer.parseInt(time.substring(6,8));
+            System.out.println("Check-out done!");
+        }
+    }
+
+
+    private static void screenChangeRegister(){
+        System.out.println("Select the required change:\n"+
+                "1 - Name\n"+
+                "2 - Address\n"+
+                "3 - Type of payment\n"+
+                "4 - Method of payment\n"+
+                "5 - Part of union\n"+
+                "6 - Union fee\n"+
+                "0 - Back to main screen");
     }
 
     private static void visualizeOptions(){
         System.out.println("\n------------------------------------------------------------\n"+
-                           "Insert 1 to ADD a new employee;");
+                "Insert 1 to ADD a new employee;");
         System.out.println("Insert 2 to REMOVE an employee;");
         System.out.println("Insert 3 to UPDATE CARTAO DO PONTO of an employee;");
         System.out.println("Insert 4 to UPDATE THE RESULT OF SALES of an employee;");
@@ -142,63 +170,143 @@ public class FolhaDePagamento2 {
 
     }
 
-    private static void addEmployee(int idEmployee){
+    private static int setIndexArray() {
+        int indexArray = -1;
+        for(int i=0; i<maxSize; i++){
+            if(name[i] == null){
+                indexArray = i;
+                break;
+            }
+        }
+        return indexArray;
+    } // really bad performance.. fix it later //return index (0 to maxSize)
+
+    private static void setAllIds() {
+        for(int i=0; i< maxSize; i++){
+            id[i] = -1;
+        }
+    } // set all ID to -1
+
+    private static int getId(int index){
+        return index + patternId;
+    }
+
+    private static int getIndex(int id){
+        return id - patternId;
+    }
+
+    private static void addEmployee(int index){
         read.nextLine();
-//        for(int i=0;i<maxSize;i++){
-//            if(name[i] == null){
-//
-//            }
-//        }
-        int indexArray = getIndexArray(idEmployee);
         String partOfUnion;
+
         System.out.println("/////////////////////////////////////////////////////////////////");
-        System.out.print("Insert your name: "); name[indexArray] = read.nextLine();
-        System.out.print("Insert your address: "); address[indexArray]= read.nextLine();
+        System.out.print("Insert your name: "); name[index] = read.nextLine();
+        System.out.print("Insert your address: "); address[index]= read.nextLine();
         System.out.println("Insert the type of payment:\n"+
-                           "h - hourly / s - salaried / c - commissioned"); typePayment[indexArray]= read.nextLine();
+                           "h - hourly / s - salaried / c - commissioned"); typePayment[index]= read.nextLine();
         System.out.println("Insert how you want to get paid:\n"+
-                           "mail - check via mail  /  hands - check via hands  /  deposit - pay via deposit");  wayPayment[indexArray] = read.nextLine();
+                           "mail - check via mail  /  hands - check via hands  /  deposit - pay via deposit");  wayPayment[index] = read.nextLine();
         System.out.println("Are you part of any union?\n"+
                          "yes  /  no"); partOfUnion = read.nextLine();
-        unionMember[indexArray] = partOfUnion.equals("yes");
-        if(unionMember[indexArray]){
-            System.out.print("Then, insert the union fee: "); unionFee[indexArray] = read.nextDouble();
+        unionMember[index] = partOfUnion.equals("yes");
+        if(unionMember[index]){
+            System.out.print("Then, insert the union fee: "); unionFee[index] = read.nextDouble();
         }
-        id[indexArray] = idEmployee;
-        System.out.println("Welcome "+ name[indexArray] + "!\nID: " + id[indexArray]);
+        id[index] = getId(index);
+        System.out.println("Welcome "+ name[index] + "!\nID: " + id[index]);
 
+        System.out.println("/////////////////////////////////////////////////////////////////");
+
+
+
+    }
+
+    private static void changeRegister(int index) {
+        System.out.println("\n------------------------------------------------------------\n");
+        boolean nonStop = true;
+        while(nonStop){
+            screenChangeRegister();
+            int option = read.nextInt();
+
+            if(option == 0) nonStop = false;
+
+            else if(option == 1){
+                System.out.println("\nInsert new name:");
+                name[index] = read.nextLine();
+                System.out.println("New name: "+ name[index] + "\nDone!");
+            }
+
+            else if(option == 2){
+                System.out.println("\nInsert new address");
+                address[index]= read.nextLine();
+                System.out.println("New address:"+ address[index]+ "\nDone!");
+            }
+
+            else if(option == 3){
+                System.out.println("\nInsert new type of payment:\n"+
+                        "h - hourly / s - salaried / c - commissioned"); typePayment[index]= read.nextLine();
+                System.out.println("Done!" );
+            }
+
+            else if(option == 4){
+                System.out.println("\nInsert new method of payment:\n"+
+                        "mail - check via mail  /  hands - check via hands  /  deposit - pay via deposit");  wayPayment[index] = read.nextLine();
+                System.out.println("Done!");
+            }
+
+            else if(option == 5){
+                String unionPart;
+                System.out.println("\nAre you part of any union?\n"+
+                        "yes  /  no"); unionPart = read.nextLine();
+                unionMember[index] = unionPart.equals("yes");
+                System.out.println("Done!");
+            }
+
+            else if(option == 6){
+                if(unionMember[index]){
+                    System.out.println("\nInsert new union fee:");
+                    unionFee[index]= read.nextDouble();
+                    System.out.println("New union fee: "+ unionFee[index]+ "\nDone!");
+                }
+                else System.out.println("\nOption only available for union members!");
+            }
+        }
+
+        System.out.println("\nAll changes made successfully! Going back to main screen!");
+        System.out.println("\n------------------------------------------------------------\n");
 
 
     }
 
     private static void deleteEmployee(int idEmployee){
-        int indexArray = getIndexArray(idEmployee);
+        int index = getIndex(idEmployee);
 
-        if(id[indexArray] != -1){
-            String savedName = name[indexArray];
-            name[indexArray] = null;
-            address[indexArray] = null;
-            typePayment[indexArray] = null;
-            wayPayment[indexArray]= null;
-            salary[indexArray] = 0;
-            commission[indexArray] = 0;
-            unionFee[indexArray] = 0;
-            unionMember[indexArray] = false;
-            id[indexArray] = 0;
+        if(id[index] != -1){
+            String savedName = name[index];
+            name[index] = null;
+            address[index] = null;
+            typePayment[index] = null;
+            wayPayment[index]= null;
+            salary[index] = 0;
+            commission[index] = 0;
+            unionFee[index] = 0;
+            unionMember[index] = false;
+            id[index] = -1;
 
-            System.out.println(savedName + " - " + idEmployee +" was deleted from system successfully!");
+            System.out.println(savedName + " - " + idEmployee +" was deleted from the system successfully!\n");
+            System.out.println("\n------------------------------------------------------------\n");
         }
-        else System.out.println("Employee not found!");
+        else{
+            System.out.println("The selected ID is not associated with any employee registered!\n"+
+                    "Operation not executed\n");
+            System.out.println("\n------------------------------------------------------------\n");
+        }
+
 
 
     }
-    private static int getIndexArray(int index){
-        return index - 19002100;
-    }
 
-    private static int biggerIndexArray(int index){
-        return index + 19002100;
-    }
+
 
 
 }
