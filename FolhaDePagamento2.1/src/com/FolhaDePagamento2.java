@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class FolhaDePagamento2 {
 
-    final static int maxSize=100;
+    final static int maxSize=500;
     final static int patternId = 19002100;
     final static double commissionFee = 0.05; /// 5% de commission
     final static double hourSalary = 50;
@@ -15,6 +15,8 @@ public class FolhaDePagamento2 {
     private static String[] typePayment = new String[maxSize]; // salaried or hourly
     private static String[] wayPayment = new String[maxSize];
     private static double[] salary = new double[maxSize];
+    private static double[] baseSalary = new double[maxSize];
+    private static double[] totalSalary = new double[maxSize];
     private static double[] commission = new double[maxSize];
     private static boolean[] unionMember = new boolean[maxSize];
     private static double[] unionFee = new double[maxSize];
@@ -24,6 +26,7 @@ public class FolhaDePagamento2 {
     private static int[] weeksWorked = new int[maxSize];
     private static String[] schedules = new String[maxSize];
     private static int counterSchedules=0;
+    private static int[] daysWorked = new int[maxSize]; //////// contar se a pessoa trabalhou todos os dias necessarios para pagar todo salario base
 
     private static int[] hourIn = new int[maxSize];
     private static int[] minuteIn = new int[maxSize];
@@ -39,34 +42,9 @@ public class FolhaDePagamento2 {
     private static int dayWeek = 1; // monday, tuesday...
     private static int lastWorkDay = 0;
 
-    private static void getDate(){
-        System.out.println(week[dayWeek]  + " - " + month[counterMonth] +" "+ counterDate + ", " + year);
-    }
-    private static void setNewDate(){
-        //System.out.println("\n\nLAST WORK DAY = "+ lastWorkDay + "\n\n");
-        counterDate+=1;
-        if(counterDate > day[counterMonth]){
-            counterDate = 1;
-            if(counterMonth + 1 > 12)
-                year+=1;
-            counterMonth = (counterMonth + 1) % 12;
-            getLastWorkDay();
-        }
-        dayWeek = (dayWeek + 1) % 7;
 
 
-    }
-    private static void getLastWorkDay(){
-        int lastDay = day[counterMonth];
-        String dayOfLast = week[(dayWeek + lastDay) % 7];
 
-        if(dayOfLast.equals("Saturday")) lastDay-=1;
-        else if(dayOfLast.equals("Sunday")) lastDay-=2;
-
-        lastWorkDay = lastDay;
-
-    }
-   /////////////////////AJEITAR PROBLEMA DE DIA DE PAGAMENTO N FAZER PARTE DO MES..
     public static void main(String[] args) {
         setAllIds();
         getLastWorkDay();
@@ -127,9 +105,7 @@ public class FolhaDePagamento2 {
 
             } //change basic info
             else if(choice == 7){
-                for(int i=0;i< 365;i++){
-                    payroll();
-                }
+                payroll();
 
                 //get rodar folha de pagamento
             }
@@ -141,51 +117,47 @@ public class FolhaDePagamento2 {
                 System.out.println("Insert ID:");
                 idEmployee = read.nextInt();
                 definePayday(idEmployee);
-
-
             }
             else if(choice == 10){
-                //create new payday settings
-                String schedule = "";
-                while(true){
-                    String entry;
-                    System.out.println("Insert 'over' to go back to main screen");
-                    System.out.println("....Adding new payment schedules....\n");
-                    System.out.println("Insert type: m - monthly  /  s - weekly");
-                    entry = read.nextLine();
-                    if(entry.equalsIgnoreCase("over")) break;
-                    schedule += entry;
-
-                    if(schedule.equals("m")){
-                        System.out.println("Insert a number for the day of payment: 01 - 25 or 00 to last business day");
-
-                        entry = read.nextLine();
-                        if(entry.equalsIgnoreCase("over")) break;
-                        schedule += " " + entry;
-                    }
-                    else if (schedule.equals("s")) {
-                        System.out.println("Insert number of worked weeks required: 01 or 02");
-
-                        entry = read.nextLine();
-                        if(entry.equalsIgnoreCase("over")) break;
-                        schedule += " " + entry;
-
-                        System.out.println("Insert the day of week:\n"+
-                                "0 - Monday\n1 - Tuesday\n2 - Wednesday\n3 - Thursday\n4 - Friday\n5 - Saturday\n6 - Sunday");
-
-                        entry = read.nextLine();
-                        if(entry.equalsIgnoreCase("over")) break;
-                        schedule += " " + entry;
-                    }
-                    schedules[counterSchedules] = schedule;
-                    counterSchedules+=1;
-                }
-
-
-
+                //create payment schedules
+                createSchedules();
             }
             else if(choice == 11){
                 //control method
+
+                System.out.println("Show 1 employee or all of them? Insert '1' for 1 employee/// Insert 'all' for all employees");
+
+                String opt = read.nextLine();
+                getDate();
+                if(opt.equalsIgnoreCase("all")){
+                    for(int i=0;i<maxSize;i++){
+                        if(id[i] != -1){
+                            System.out.println("Name= "+ name[index]);
+                            System.out.println("Address= "+ address[index]);
+                            System.out.println("Type of payment= ");
+                            if(typePayment[i].equals("c"))
+                                System.out.println("commissioned");
+                            System.out.println("Base salary: R$" + baseSalary[i]);
+                            else if(typePayment[i].equals("s"))
+                                System.out.println("salaried");
+                            System.out.println("Base salary: R$"+ baseSalary[i]);
+                            else
+                                System.out.println("hourly");
+                            System.out.println("Id="+ id[index] );
+                            System.out.println("Part of union= ");
+                            if(unionMember[i])
+                                System.out.println("yes");
+                            else
+                                System.out.println("no");
+                            if(unionMember[i])
+                                System.out.println("Union fee= "+ unionFee[index]);
+                            System.out.println("Check in= " + hourIn[index] + ":" + minuteIn[index]);
+                            System.out.println("Check out= " + hourOut[index] + ":" + minuteOut[index]);
+                            System.out.println("Total salary in month: " + totalSalary[i]);
+                            System.out.println("Way of payment: " + wayPayment[i]);
+                        }
+                    }
+                }
 
                 System.out.println("Select id:");
                 int selectedEmployee = read.nextInt();
@@ -211,6 +183,36 @@ public class FolhaDePagamento2 {
 
     }
 
+
+    private static void getDate(){
+        System.out.println(week[dayWeek]  + " - " + month[counterMonth] +" "+ counterDate + ", " + year);
+    }
+
+    private static void setNewDate(){
+        //System.out.println("\n\nLAST WORK DAY = "+ lastWorkDay + "\n\n");
+        counterDate+=1;
+        if(counterDate > day[counterMonth]){
+            counterDate = 1;
+            if(counterMonth + 1 > 12)
+                year+=1;
+            counterMonth = (counterMonth + 1) % 12;
+            getLastWorkDay();
+        }
+        dayWeek = (dayWeek + 1) % 7;
+
+
+    }
+
+    private static void getLastWorkDay(){
+        int lastDay = day[counterMonth];
+        String dayOfLast = week[(dayWeek + lastDay) % 7];
+
+        if(dayOfLast.equals("Saturday")) lastDay-=1;
+        else if(dayOfLast.equals("Sunday")) lastDay-=2;
+
+        lastWorkDay = lastDay;
+
+    }
 
     private static void payroll() {
         int index;
@@ -257,6 +259,7 @@ public class FolhaDePagamento2 {
 
     private static void setTimeCheck(int index) {
         int hours;
+        double totalMoneyAccounted;
         System.out.println("Are you checking in or checking out?\n"+
                 "1 - in\n"+
                 "2 - out");
@@ -278,7 +281,20 @@ public class FolhaDePagamento2 {
             if(hourOut[index] < hourIn[index]) hours = (24 - hourIn[index]) + hourOut[index];
             else hours = hourOut[index] - hourIn[index];
             if(minuteOut[index] < minuteIn[index]) hours-=1;
-            double totalMoneyAccounted = (hours - 8)*1.5*hourSalary + hours*hourSalary;
+
+            if(typePayment[index].equals("h")){
+                if(hours > 8)
+                    totalMoneyAccounted = (hours - 8)*1.5*hourSalary + 8*hourSalary;
+                else (hours <= 8)
+                    totalMoneyAccounted = hours*hourSalary;
+            }
+
+            else if(typePayment[index].equals("c")){
+                salary[index] = salary[index] + commission[index] +
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            }
+
+
             salary[index] = totalMoneyAccounted;
             System.out.println("Total of R$" + totalMoneyAccounted + " to " + name[index] +" - " + hours + "worked at date:");
             getDate();
@@ -372,6 +388,11 @@ public class FolhaDePagamento2 {
         else if(typePayment[index].equals("s")) payday[index] = "m 00"; // mensal ultimo util
         else if(typePayment[index].equals("c")) payday[index] = "s 02 4"; // semanal 2 semanas sexta
 
+        if(typePayment[index].equals("s") || typePayment[index].equals("c")){
+            System.out.println("Insert base salary:\nNumber format: 9999,99\nR$ ");
+            baseSalary[index] = read.nextDouble();
+            read.nextLine();////////////////////////////*****
+        }
         System.out.println("Insert how you want to get paid:\n"+
                            "mail - check via mail  /  check in hands - check via hands  /  deposit - pay via deposit");  wayPayment[index] = read.nextLine();
         System.out.println("Are you part of any union?\n"+
@@ -451,10 +472,10 @@ public class FolhaDePagamento2 {
 
     private static void resultSales(int idEmployee){
         int index = getIndex(idEmployee);
+        double value;
         if(typePayment[index].equals("c")){
-            double value;
             if(id[index] != -1){
-                System.out.println("Insert value of sale:\nFormat: 9999,99");
+                System.out.println("Insert value of sale:\nNumber format: 9999,99");
                 value = read.nextDouble();
                 salary[index] = value*commissionFee;
                 System.out.println("Sale by "+ name[index]+" on ");
@@ -514,6 +535,45 @@ public class FolhaDePagamento2 {
             }
         }
         System.out.println("Back to main screen.\n-----------------------------------------------------------------------");
+
+    }
+
+    private static void createSchedules(){
+        //create new payday settings
+        String schedule = "";
+        while(true){
+            String entry;
+            System.out.println("Insert 'over' to go back to main screen");
+            System.out.println("....Adding new payment schedules....\n");
+            System.out.println("Insert type: m - monthly  /  s - weekly");
+            entry = read.nextLine();
+            if(entry.equalsIgnoreCase("over")) break;
+            schedule += entry;
+
+            if(schedule.equals("m")){
+                System.out.println("Insert a number for the day of payment: 01 - 25 or 00 to last business day");
+
+                entry = read.nextLine();
+                if(entry.equalsIgnoreCase("over")) break;
+                schedule += " " + entry;
+            }
+            else if (schedule.equals("s")) {
+                System.out.println("Insert number of worked weeks required: 01 or 02");
+
+                entry = read.nextLine();
+                if(entry.equalsIgnoreCase("over")) break;
+                schedule += " " + entry;
+
+                System.out.println("Insert the day of week:\n"+
+                        "0 - Monday\n1 - Tuesday\n2 - Wednesday\n3 - Thursday\n4 - Friday\n5 - Saturday\n6 - Sunday");
+
+                entry = read.nextLine();
+                if(entry.equalsIgnoreCase("over")) break;
+                schedule += " " + entry;
+            }
+            schedules[counterSchedules] = schedule;
+            counterSchedules+=1;
+        }
 
     }
 
