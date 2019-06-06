@@ -30,17 +30,17 @@ Após, terá as opções:
 
 9-Escolher uma agenda de pagamento para um funcionário.
 
-**Note-se que comissionados só podem receber de 2 em 2 semanas, horistas apenas semanalmente e assalariados apenas mensalmente.
+*Note-se que comissionados só podem receber de 2 em 2 semanas, horistas apenas semanalmente e assalariados apenas mensalmente.
 
-**Salariados escolhem um dia de pagamento ou o último dia útil do mês.
+*Salariados escolhem um dia de pagamento ou o último dia útil do mês.
 
-**Comissionados e horistas escolhem apenas o dia da semana que preferem ser pagos.
+*Comissionados e horistas escolhem apenas o dia da semana que preferem ser pagos.
 
 10-Criar novas agendas de pagamento
 
-**FORMATO:( ------ )ou (p, ,int,int, , d)
+*FORMATO:( ------ )ou (p, ,int,int, , d)
 
-**onde, p = forma de pagamento ( m- mensal ou s - semanal) // int int = 01 ou 02 (se for semanal -- 01 ou 02 semanas) ou 00 até 25 ( dia de pagamento) se for pago mensalmente // d = se for semanalmente pago, será um int de 0 a 6, indicando o dia da semana ( 0- Segunda, 1 - Terça, ..., 6 - Domingo)
+*onde, p = forma de pagamento ( m- mensal ou s - semanal) // int int = 01 ou 02 (se for semanal -- 01 ou 02 semanas) ou 00 até 25 ( dia de pagamento) se for pago mensalmente // d = se for semanalmente pago, será um int de 0 a 6, indicando o dia da semana ( 0- Segunda, 1 - Terça, ..., 6 - Domingo)
 
 11-Mostrar informações de 1 funcionário ou de todos cadastrados
 
@@ -50,4 +50,4 @@ Após, terá as opções:
 
 Arquivo final = FolhaDePagamento3.java na pasta FolhaDePagamento3
 
-Info: **hlc2@ic.ufal.br
+Info: *hlc2@ic.ufal.br
